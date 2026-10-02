@@ -1,0 +1,16 @@
+.build/
+dist/
+.DS_Store
+.swiftpm/
+*.app/
+*.zip
+*.dmg
+.env
+.env.*
+*.p12
+*.p8
+*.key
+.agents/
+.codex/
+PRODUCT.md
+DESIGN.md
