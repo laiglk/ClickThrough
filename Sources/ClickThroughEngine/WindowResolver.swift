@@ -10,7 +10,14 @@ struct WindowTarget {
     let point: CGPoint
 }
 
-final class WindowResolver {
+protocol WindowResolving {
+    func target(at point: CGPoint, excluded: Set<String>) -> WindowTarget?
+    func raise(_ target: WindowTarget, cancellation: CancellationToken)
+    func isFocused(_ target: WindowTarget) -> Bool
+    func stillUnderPointer(_ target: WindowTarget) -> Bool?
+}
+
+final class WindowResolver: WindowResolving {
     private let system = AXUIElementCreateSystemWide()
 
     init() { AXUIElementSetMessagingTimeout(system, 0.035) }

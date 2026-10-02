@@ -7,7 +7,9 @@ let package = Package(
     products: [.executable(name: "ClickThrough", targets: ["ClickThrough"])],
     targets: [
         .target(name: "ClickThroughCore"),
-        .executableTarget(name: "ClickThrough", dependencies: ["ClickThroughCore"]),
-        .executableTarget(name: "ClickThroughCoreTests", dependencies: ["ClickThroughCore"], path: "Tests/ClickThroughCoreTests")
+        .target(name: "ClickThroughEngine", dependencies: ["ClickThroughCore"]),
+        .executableTarget(name: "ClickThrough", dependencies: ["ClickThroughEngine"]),
+        .executableTarget(name: "ClickThroughCoreTests", dependencies: ["ClickThroughCore"], path: "Tests/ClickThroughCoreTests"),
+        .executableTarget(name: "ClickThroughEngineTests", dependencies: ["ClickThroughCore", "ClickThroughEngine"], path: "Tests/ClickThroughEngineTests")
     ]
 )

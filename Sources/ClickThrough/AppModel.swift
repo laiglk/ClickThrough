@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import ClickThroughEngine
 import ServiceManagement
 import SwiftUI
 import UniformTypeIdentifiers

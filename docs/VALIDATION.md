@@ -16,6 +16,18 @@ Statut initial : **à effectuer après autorisation d’accessibilité**. Ne pas
 
 ## Préparation
 
+### Contrôles automatiques avant les essais interactifs
+
+Exécuter `bash scripts/test.sh`. Les tests de la file sont complétés par des tests
+du moteur réel avec un résolveur, une horloge et une sortie simulés, sans event tap
+ni clic envoyé. Ils couvrent notamment la saturation et les erreurs de copie
+pendant l’activation, les changements de focus ou de fenêtre après stabilisation,
+le relâchement du bouton après annulation et les réponses tardives après arrêt ou
+expiration. Leur réussite ne valide pas le hit-test AX, l’activation réelle ni la
+réception des événements par les applications ci-dessous.
+
+### Configuration de l’essai
+
 Ouvrir le bundle compilé et autoriser ClickThrough. Disposer les quatre applications sur deux écrans. Refaire les essais avec le second écran à gauche, puis au-dessus de l’écran principal (origines négatives). Désactiver temporairement les autres utilitaires de souris pour isoler les résultats.
 
 ## Scénarios prioritaires
