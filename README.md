@@ -54,11 +54,13 @@ Une icône de curseur apparaît dans la barre de menus : activation/pause, exclu
 
 ## Statut et limites
 
-**Prototype 0.1, pas une garantie de compatibilité universelle.** Les tests automatiques valident la file d’événements ; ils ne remplacent pas les essais interactifs avec l’autorisation d’accessibilité. Voir [la matrice de validation](docs/VALIDATION.md).
+**Prototype 0.1, pas une garantie de compatibilité universelle.** Les tests automatiques valident la file d’événements et les transactions du moteur avec un résolveur et une horloge simulés ; ils ne remplacent pas les essais interactifs avec l’autorisation d’accessibilité. Voir [la matrice de validation](docs/VALIDATION.md).
 
 Les clics droits, les clics avec ⌘/⌃/⌥/⇧, les clics multiples déjà identifiés comme tels, le bureau, les fenêtres non standard, les boutons de contrôle des fenêtres et les fenêtres avec feuilles modales gardent leur comportement macOS. Les réglages système sont également exclus. Mission Control, les changements de Spaces, plein écran et fenêtres privilégiées ne font pas partie des scénarios garantis. Aucun focus au survol.
 
 Le système cherche la fenêtre via l’API d’accessibilité. Les applications ne publiant pas une fenêtre standard exploitable conservent leur comportement normal. Le premier clic est retenu au maximum 250 ms. Si la recherche de fenêtre expire avant l’activation, il est transmis normalement. Si l’activation a commencé mais ne se confirme pas, ou si la fenêtre sous le point cliqué change, le geste gauche est annulé pour ne pas agir dans une autre fenêtre. Une application lente peut donc encore demander un deuxième clic. Le compteur des réglages mesure les transmissions après activation, pas une confirmation de l’action par l’application destinataire.
+
+La saturation de la file et les erreurs de copie suivent la même règle : transmission normale avant le début de l’activation, annulation du geste gauche après. Les autres événements souris sont conservés. Le focus et la fenêtre visée sont revérifiés après le délai de stabilisation, juste avant la transmission ; cette vérification n’est pas atomique avec les changements de fenêtre du système.
 
 La version locale utilise une signature ad hoc. Une recompilation peut nécessiter de retirer puis réajouter l’application dans les permissions. Pour distribuer l’application, prévoir une signature Developer ID et une notarisation. `SIGN_IDENTITY` permet de fournir une identité au script de compilation. Les identités de signature et la notarisation ne sont pas configurées dans ce dépôt.
 
@@ -72,6 +74,7 @@ Le script exécute les tests, compile l’application, puis crée dans `dist/rel
 
 ## Architecture
 
+- `ClickThroughEngine` : module du moteur, partagé entre l’application et ses tests ; dépendances système injectables pour les tests.
 - `ClickEngine` : event tap de session, file bornée, délai maximal, réinjection marquée pour éviter la récursion.
 - `WindowResolver` : identification et activation des fenêtres par AX, sur une file dédiée. Aucun appel AX synchrone dans le callback du tap.
 - `EventBuffer` : transactions identifiées pour ignorer les résultats AX arrivés après expiration.
@@ -86,7 +89,7 @@ Le clic initial est supprimé du flux pendant l’activation, puis réinjecté u
 bash scripts/test.sh
 ```
 
-Le lanceur de tests fonctionne avec les seuls Command Line Tools, sans XCTest. Il vérifie l’ordre et l’unicité des événements, les résultats tardifs, la saturation, l’annulation et la conservation des métadonnées de vrais `CGEvent` (sans les envoyer).
+Le lanceur de tests fonctionne avec les seuls Command Line Tools, sans XCTest. Il exécute les contrôles de `ClickThroughCore` puis ceux de `ClickThroughEngine`. Ces derniers parcourent le moteur réel avec un résolveur, un ordonnanceur et une sortie simulés : ordre et unicité, saturation et erreurs de copie pendant l’activation, changements de focus ou de fenêtre pendant la stabilisation, relâchement après annulation, arrêt et résultats tardifs. Les métadonnées de vrais `CGEvent` sont également vérifiées. Aucun event tap n’est installé, aucune application n’est activée et aucun événement n’est envoyé.
 
 Le package s’ouvre aussi avec Xcode via `Package.swift`. Pour les permissions et `SMAppService`, utiliser le bundle `.app` généré plutôt que `swift run`.
 
